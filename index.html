@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadoras Financieras Argentina 2024 | Simuladores ARS</title>
+  <meta name="description" content="Portal gratuito de simuladores financieros para Argentina. Calculá interés compuesto, plazo fijo vs inflación, cuotas, devaluación y más. Sin registro, 100% anónimo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ===================== RESET & BASE ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0c0f;
+      --surface: #111318;
+      --surface2: #181c23;
+      --border: #1f2530;
+      --border2: #2a3140;
+      --accent: #00e5a0;
+      --accent2: #0097ff;
+      --accent3: #ff6b35;
+      --warn: #ffb800;
+      --text: #e8ecf2;
+      --text2: #8b95a8;
+      --text3: #4d5668;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    ::selection { background: var(--accent); color: #000; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ===================== LAYOUT ===================== */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    /* ===================== NAV ===================== */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,15,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+    .nav-logo span { color: var(--text2); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      font-size: 13px; color: var(--text2);
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; transition: all 0.15s;
+      border: none; background: none;
+    }
+    .nav-link:hover { color: var(--text); background: var(--surface2); }
+    .nav-link.active { color: var(--accent); background: rgba(0,229,160,0.08); }
+
+    /* ===================== HERO ===================== */
+    #home {
+      padding: 80px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #home::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(0,229,160,0.08), transparent);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.2);
+      color: var(--accent);
+      font-size: 12px; font-family: var(--mono);
+      padding: 4px 12px; border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.05em;
+    }
+    .hero-tag::before { content: '▸'; }
+    h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.02em; margin-bottom: 20px;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      font-size: 17px; color: var(--text2);
+      max-width: 560px; margin: 0 auto 36px;
+      font-weight: 300;
+    }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: var(--mono); font-size: 28px;
+      font-weight: 700; color: var(--accent);
+      display: block; line-height: 1;
+    }
+    .stat-label { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+    /* ===================== SECTION HEADER ===================== */
+    .section-header {
+      padding: 48px 20px 28px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 11px; color: var(--text3);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 24px; font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    /* ===================== TOOL CARDS GRID ===================== */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      padding: 0 20px 40px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--accent));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.2s;
+    }
+    .tool-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .tool-card:hover::before { transform: scaleX(1); }
+    .card-icon { font-size: 24px; margin-bottom: 12px; display: block; }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+    .card-tag {
+      display: inline-block; margin-top: 10px;
+      font-size: 10px; font-family: var(--mono);
+      color: var(--text3); background: var(--bg);
+      padding: 2px 7px; border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ===================== TOOL PAGE ===================== */
+    #tool-view { display: none; }
+    #tool-view.active { display: block; }
+    #home-view { display: block; }
+    #home-view.hidden { display: none; }
+
+    .tool-page {
+      max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px;
+    }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text2);
+      background: none; border: none; cursor: pointer;
+      padding: 6px 0; margin-bottom: 24px;
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--text); }
+    .tool-header { margin-bottom: 32px; }
+    .tool-header h1 { font-size: 28px; margin-bottom: 8px; }
+    .tool-header p { color: var(--text2); font-size: 15px; }
+
+    .tool-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+    @media (max-width: 768px) {
+      .tool-layout { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+
+    /* ===================== PANEL ===================== */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .panel-title {
+      font-size: 13px; font-family: var(--mono);
+      color: var(--text3); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 20px;
+    }
+
+    /* ===================== FORM ===================== */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--text2); margin-bottom: 6px;
+    }
+    .field label .hint { color: var(--text3); font-weight: 400; margin-left: 4px; }
+    .field input, .field select {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text); font-family: var(--mono);
+      font-size: 14px; transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .field input::placeholder { color: var(--text3); }
+
+    .btn {
+      width: 100%; padding: 12px;
+      background: var(--accent); color: #000;
+      border: none; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 13px;
+      font-weight: 700; letter-spacing: 0.05em;
+      cursor: pointer; transition: all 0.15s;
+      margin-top: 4px;
+    }
+    .btn:hover { background: #00ffb3; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    /* ===================== RESULT CARDS ===================== */
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .result-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .result-card.highlight {
+      background: rgba(0,229,160,0.05);
+      border-color: rgba(0,229,160,0.2);
+    }
+    .result-card.warn {
+      background: rgba(255,184,0,0.05);
+      border-color: rgba(255,184,0,0.2);
+    }
+    .result-card.danger {
+      background: rgba(255,107,53,0.05);
+      border-color: rgba(255,107,53,0.2);
+    }
+    .result-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .result-value { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); }
+    .result-value.green { color: var(--accent); }
+    .result-value.yellow { color: var(--warn); }
+    .result-value.red { color: var(--accent3); }
+    .result-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* ===================== CHART ===================== */
+    .chart-wrap {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    canvas { max-height: 280px; }
+
+    /* ===================== TABLE ===================== */
+    .table-wrap {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .table-toggle {
+      width: 100%; padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: none; border: none; cursor: pointer;
+      color: var(--text2); font-size: 13px; font-family: var(--sans);
+    }
+    .table-toggle:hover { background: var(--surface); }
+    .table-toggle .arrow { transition: transform 0.2s; font-size: 10px; }
+    .table-toggle.open .arrow { transform: rotate(180deg); }
+    .table-body { display: none; overflow-x: auto; }
+    .table-body.open { display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      text-align: left; padding: 10px 14px;
+      background: var(--surface); color: var(--text3);
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 14px; border-bottom: 1px solid var(--border);
+      color: var(--text2); font-family: var(--mono);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); color: var(--text); }
+
+    /* ===================== INFO BOX ===================== */
+    .info-box {
+      background: rgba(0,151,255,0.06);
+      border: 1px solid rgba(0,151,255,0.15);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px; color: var(--text2);
+      margin-bottom: 16px;
+    }
+    .info-box strong { color: var(--accent2); }
+
+    .warn-box {
+      background: rgba(255,184,0,0.06);
+      border: 1px solid rgba(255,184,0,0.15);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px; color: var(--text2);
+      margin-bottom: 16px;
+    }
+    .warn-box strong { color: var(--warn); }
+
+    /* ===================== SEPARATOR ===================== */
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+
+    /* ===================== EMPTY STATE ===================== */
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--text3); font-size: 13px;
+    }
+    .empty-state .big { font-size: 32px; margin-bottom: 8px; }
+
+    /* ===================== FAQ ===================== */
+    .faq-section { margin-top: 40px; }
+    .faq-section h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; text-align: left;
+      background: none; border: none; cursor: pointer;
+      padding: 14px 0; font-size: 14px; font-weight: 500;
+      color: var(--text2); display: flex;
+      justify-content: space-between; align-items: center;
+      transition: color 0.15s;
+    }
+    .faq-q:hover { color: var(--text); }
+    .faq-q.open { color: var(--accent); }
+    .faq-a {
+      display: none; padding: 0 0 14px;
+      font-size: 13px; color: var(--text3); line-height: 1.7;
+    }
+    .faq-a.open { display: block; }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 20px;
+      text-align: center;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; }
+    .footer-disclaimer {
+      font-size: 12px; color: var(--text3); margin-bottom: 12px;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .footer-links a { font-size: 12px; color: var(--text3); }
+    .footer-links a:hover { color: var(--text2); }
+
+    /* ===================== ANIMATIONS ===================== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.4s ease both; }
+    .delay-1 { animation-delay: 0.05s; }
+    .delay-2 { animation-delay: 0.1s; }
+    .delay-3 { animation-delay: 0.15s; }
+
+    /* ===================== BADGE ===================== */
+    .badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 4px; font-size: 10px; font-family: var(--mono);
+      font-weight: 700; letter-spacing: 0.05em;
+    }
+    .badge-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .badge-yellow { background: rgba(255,184,0,0.1); color: var(--warn); border: 1px solid rgba(255,184,0,0.2); }
+    .badge-red { background: rgba(255,107,53,0.1); color: var(--accent3); border: 1px solid rgba(255,107,53,0.2); }
+  </style>
+</head>
+<body>
+
+<!-- ===================== NAV ===================== -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">CALC<span>/</span>AR</div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="showHome()">Inicio</button>
+      <button class="nav-link" onclick="scrollToSection('tools-list')">Herramientas</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HOME VIEW ===================== -->
+<div id="home-view">
+
+  <!-- HERO -->
+  <section id="home">
+    <div class="container">
+      <div class="hero-tag fade-up">Calculadoras Financieras · Argentina 2024</div>
+      <h1 class="fade-up delay-1">Tomá <em>decisiones</em><br>con números reales</h1>
+      <p class="hero-sub fade-up delay-2">12 simuladores financieros adaptados al contexto argentino. Inflación, devaluación, tasas reales y más. Sin registro, sin publicidad.</p>
+      <div class="hero-stats fade-up delay-3">
+        <div class="stat-item"><span class="stat-num">12</span><div class="stat-label">Herramientas</div></div>
+        <div class="stat-item"><span class="stat-num">ARS</span><div class="stat-label">Moneda base</div></div>
+        <div class="stat-item"><span class="stat-num">0</span><div class="stat-label">Registro requerido</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS LIST -->
+  <section id="tools-list">
+    <div class="section-header">
+      <div class="section-tag">// Simuladores</div>
+      <div class="section-title">Todas las herramientas</div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card" style="--card-accent:#00e5a0" onclick="openTool('interes-compuesto')">
+        <span class="card-icon">📈</span>
+        <div class="card-title">Interés Compuesto</div>
+        <div class="card-desc">Proyectá tu capital con reinversión, mostrando valor nominal y real descontando inflación.</div>
+        <span class="card-tag">inflacion · meses</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#0097ff" onclick="openTool('cuotas-vs-contado')">
+        <span class="card-icon">💳</span>
+        <div class="card-title">Cuotas vs Contado</div>
+        <div class="card-desc">¿Conviene pagar en cuotas o de contado? Compará el costo real de financiarte.</div>
+        <span class="card-tag">CFT · cuotas</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#ff6b35" onclick="openTool('comprar-vs-alquilar')">
+        <span class="card-icon">🏠</span>
+        <div class="card-title">Comprar vs Alquilar</div>
+        <div class="card-desc">Analizá cuándo conviene comprar una propiedad versus seguir alquilando.</div>
+        <span class="card-tag">inmuebles · USD</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#ffb800" onclick="openTool('plazo-fijo')">
+        <span class="card-icon">🏦</span>
+        <div class="card-title">Plazo Fijo vs Inflación</div>
+        <div class="card-desc">Calculá si tu plazo fijo te genera ganancia real o estás perdiendo poder adquisitivo.</div>
+        <span class="card-tag">TNA · inflacion</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#a78bfa" onclick="openTool('cuando-llego')">
+        <span class="card-icon">🎯</span>
+        <div class="card-title">¿Cuándo llego a $X?</div>
+        <div class="card-desc">Proyectá en cuántos meses alcanzás tu objetivo de ahorro con aportes regulares.</div>
+        <span class="card-tag">ahorro · meta</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#34d399" onclick="openTool('nominal-vs-real')">
+        <span class="card-icon">📊</span>
+        <div class="card-title">Rendimiento Nominal vs Real</div>
+        <div class="card-desc">Convertí tasas nominales en tasas reales usando la fórmula de Fisher.</div>
+        <span class="card-tag">Fisher · TNA · TEA</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#f472b6" onclick="openTool('rentabilidad-alquiler')">
+        <span class="card-icon">🏘️</span>
+        <div class="card-title">Rentabilidad del Alquiler</div>
+        <div class="card-desc">Calculá el rendimiento bruto y neto de una propiedad en alquiler.</div>
+        <span class="card-tag">yield · inmuebles</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#fb923c" onclick="openTool('devaluacion')">
+        <span class="card-icon">💵</span>
+        <div class="card-title">Simulador de Devaluación</div>
+        <div class="card-desc">Proyectá el impacto de distintos escenarios de devaluación en tus ahorros.</div>
+        <span class="card-tag">ARS/USD · brecha</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#22d3ee" onclick="openTool('hipotecario')">
+        <span class="card-icon">🏗️</span>
+        <div class="card-title">Simulador Hipotecario</div>
+        <div class="card-desc">Calculá cuotas, intereses totales y tabla de amortización de tu crédito.</div>
+        <span class="card-tag">UVA · amortizacion</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#e879f9" onclick="openTool('poder-adquisitivo')">
+        <span class="card-icon">📉</span>
+        <div class="card-title">Poder Adquisitivo</div>
+        <div class="card-desc">Cuánto vale hoy lo que tenías antes. El impacto de la inflación acumulada.</div>
+        <span class="card-tag">IPC · inflacion acum</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#4ade80" onclick="openTool('comparador-inversiones')">
+        <span class="card-icon">⚖️</span>
+        <div class="card-title">Comparador de Inversiones</div>
+        <div class="card-desc">Compará dos activos con distinta tasa y riesgo para ver cuál conviene más.</div>
+        <span class="card-tag">A vs B · rendimiento</span>
+      </div>
+      <div class="tool-card" style="--card-accent:#f87171" onclick="openTool('costo-prestamo')">
+        <span class="card-icon">💸</span>
+        <div class="card-title">Costo Real del Préstamo</div>
+        <div class="card-desc">Calculá el CFT simplificado y cuánto pagás de más en un crédito personal.</div>
+        <span class="card-tag">CFT · gastos · seguros</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-disclaimer">⚠️ Estas calculadoras son herramientas educativas. No constituyen asesoramiento financiero. Consultá un profesional antes de tomar decisiones de inversión.</p>
+      <div class="footer-links">
+        <a href="#home">Inicio</a>
+        <a href="#tools-list">Herramientas</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===================== TOOL VIEW ===================== -->
+<div id="tool-view">
+  <div class="tool-page" id="tool-container"></div>
+</div>
+
+
+<script>
+// =====================================================================
+//  HELPERS FINANCIEROS
+// =====================================================================
+
+const fmt = (n, dec=0) => {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return new Intl.NumberFormat('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n);
+};
+const fmtARS = (n, dec=0) => '$ ' + fmt(n, dec);
+const fmtPct = (n, dec=2) => fmt(n, dec) + '%';
+
+// Interés compuesto mensual
+function calcCompoundMonthly(capital, tasaMensual, meses, infMensual) {
+  const rows = [];
+  let saldo = capital;
+  for (let m = 1; m <= meses; m++) {
+    const interes = saldo * tasaMensual;
+    saldo += interes;
+    const saldoReal = saldo / Math.pow(1 + infMensual, m);
+    rows.push({ mes: m, saldo: saldo, saldoReal: saldoReal, interes: interes });
+  }
+  return rows;
+}
+
+// Cuota sistema francés
+function cuotaFrances(capital, tasaMensual, meses) {
+  if (tasaMensual === 0) return capital / meses;
+  return capital * (tasaMensual * Math.pow(1 + tasaMensual, meses)) / (Math.pow(1 + tasaMensual, meses) - 1);
+}
+
+// Tasa real (Fisher)
+function tasaReal(tasaNominal, inflacion) {
+  return (1 + tasaNominal) / (1 + inflacion) - 1;
+}
+
+// TNA a tasa mensual
+function tnaAMensual(tna) { return tna / 12; }
+function tnaATea(tna) { return Math.pow(1 + tnaAMensual(tna), 12) - 1; }
+
+// Valor futuro con ahorro mensual
+function valorFuturo(capital, aporteMensual, tasaMensual, meses) {
+  const vfCapital = capital * Math.pow(1 + tasaMensual, meses);
+  let vfAportes = 0;
+  for (let m = 1; m <= meses; m++) {
+    vfAportes += aporteMensual * Math.pow(1 + tasaMensual, meses - m);
+  }
+  return vfCapital + vfAportes;
+}
+
+// Tabla amortización francesa
+function tablaAmortizacion(capital, tasaMensual, meses) {
+  const cuota = cuotaFrances(capital, tasaMensual, meses);
+  const rows = [];
+  let saldo = capital;
+  for (let m = 1; m <= meses; m++) {
+    const interes = saldo * tasaMensual;
+    const amort = cuota - interes;
+    saldo -= amort;
+    rows.push({ mes: m, cuota, interes, amort, saldo: Math.max(0, saldo) });
+  }
+  return rows;
+}
+
+// =====================================================================
+//  CHART MANAGER
+// =====================================================================
+let activeChart = null;
+function renderChart(id, config) {
+  if (activeChart) { activeChart.destroy(); activeChart = null; }
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  Chart.defaults.color = '#8b95a8';
+  Chart.defaults.borderColor = '#1f2530';
+  activeChart = new Chart(ctx, config);
+}
+
+// =====================================================================
+//  NAVIGATION
+// =====================================================================
+function showHome() {
+  document.getElementById('home-view').classList.remove('hidden');
+  document.getElementById('tool-view').classList.remove('active');
+  document.querySelectorAll('.nav-link').forEach((b,i) => b.classList.toggle('active', i===0));
+  if (activeChart) { activeChart.destroy(); activeChart = null; }
+  window.scrollTo(0,0);
+}
+
+function openTool(id) {
+  document.getElementById('home-view').classList.add('hidden');
+  const tv = document.getElementById('tool-view');
+  tv.classList.add('active');
+  document.getElementById('tool-container').innerHTML = TOOLS[id]();
+  window.scrollTo(0,0);
+}
+
+function scrollToSection(id) {
+  showHome();
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({behavior:'smooth'}), 50);
+}
+
+// Toggle table
+function toggleTable(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+// Toggle FAQ
+function toggleFaq(btn) {
+  const ans = btn.nextElementSibling;
+  btn.classList.toggle('open');
+  ans.classList.toggle('open');
+  btn.querySelector('.faq-arrow').textContent = btn.classList.contains('open') ? '▲' : '▼';
+}
+
+// =====================================================================
+//  TOOL DEFINITIONS
+// =====================================================================
+
+const TOOLS = {
+
+  // ===================================================================
+  // 1. INTERÉS COMPUESTO
+  // ===================================================================
+  'interes-compuesto': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>📈 Calculadora de Interés Compuesto</h1>
+      <p>Proyectá el crecimiento de tu capital con reinversión de ganancias, mostrando valor nominal y real descontando inflación.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+
+          <div class="field">
+            <label>Moneda</label>
+            <div style="display:flex;gap:8px;margin-top:2px">
+              <button id="ic-btn-ars" onclick="icSetMoneda('ARS')"
+                style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:rgba(0,229,160,0.08);color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;">
+                🇦🇷 ARS
+              </button>
+              <button id="ic-btn-usd" onclick="icSetMoneda('USD')"
+                style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:none;color:var(--text2);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;">
+                🇺🇸 USD
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Capital inicial <span class="hint" id="ic-label-capital">(ARS)</span></label>
+            <input id="ic-capital" type="number" value="1000000" placeholder="1000000">
+          </div>
+          <div class="field">
+            <label>Tasa anual <span class="hint">(%)</span></label>
+            <input id="ic-tna" type="number" value="118" step="0.1">
+            <div id="ic-sugerencias-tasa" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px">
+              <button onclick="icAplicarTasa(10)" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;font-family:var(--mono)">S&P500 ~10% →</button>
+              <button onclick="icAplicarTasa(4.3)" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;font-family:var(--mono)">T-Bond ~4.3% →</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Capitalización <span class="hint">(frecuencia de reinversión)</span></label>
+            <select id="ic-cap" onchange="icToggleCap()">
+              <option value="mensual">Mensual — plazo fijo, FCI, cuentas remuneradas</option>
+              <option value="anual">Anual — bonos, S&P500, inversiones anuales</option>
+            </select>
+            <div id="ic-cap-nota" style="margin-top:6px;font-size:11px;color:var(--text3);font-family:var(--mono)">
+              💡 Mensual = interés se reinvierte cada mes. Anual = una sola vez por año.
+            </div>
+          </div>
+          <div class="field">
+            <label id="ic-label-inf">Inflación anual esperada <span class="hint">(%)</span></label>
+            <div style="position:relative">
+              <input id="ic-inf" type="number" value="140" step="0.1">
+              <div id="ic-inf-sugerencia" style="display:none;margin-top:5px;font-size:11px;color:var(--text3);font-family:var(--mono)">
+                💡 Inflación histórica EE.UU.: ~3% anual (Fed apunta a 2%). 
+                <span style="color:var(--accent);cursor:pointer;text-decoration:underline" onclick="document.getElementById('ic-inf').value=3">Usar 3%</span>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Período <span class="hint">(meses)</span></label>
+            <input id="ic-meses" type="number" value="12" min="1" max="360">
+          </div>
+          <div class="field">
+            <label>Aporte mensual adicional <span class="hint" id="ic-label-aporte">(ARS, opcional)</span></label>
+            <input id="ic-aporte" type="number" value="0" placeholder="0">
+          </div>
+          <button class="btn" onclick="calcIC()">Calcular →</button>
+        </div>
+        <div style="margin-top:12px" id="ic-results-panel"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Evolución del capital</div>
+          <div id="ic-chart-wrap" class="empty-state"><div class="big">📈</div>Completá los datos y presioná Calcular</div>
+        </div>
+        <div id="ic-chart-nota" style="display:none;margin-top:8px">
+          <div class="info-box" style="font-size:12px">
+            <strong>📊 Línea verde:</strong> capital nominal acumulado (en <span id="ic-nota-moneda">ARS</span>). 
+            <strong style="color:var(--accent3)">Línea naranja:</strong> poder adquisitivo real, descontando la inflación. 
+            Si la línea naranja cae, tu dinero compra menos aunque el número nominal suba.
+          </div>
+        </div>
+        <div style="margin-top:12px" id="ic-table-wrap"></div>
+        <div class="faq-section">
+          <h2>Preguntas frecuentes</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es el interés compuesto? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El interés compuesto reinvierte las ganancias, generando rendimientos sobre rendimientos. A diferencia del simple, el capital crece exponencialmente. En Argentina, con inflación alta, es clave comparar el rendimiento nominal con la inflación para saber si realmente ganás poder adquisitivo.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es la tasa real? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">La tasa real es el rendimiento descontando la inflación. Se calcula con la fórmula de Fisher: (1 + nominal) / (1 + inflación) - 1. Si la tasa nominal es 118% y la inflación es 140%, la tasa real es negativa: estás perdiendo poder adquisitivo.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Por qué el valor real cae aunque el nominal sube? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Porque la inflación erosiona el poder de compra más rápido de lo que crecen los intereses. Si tu inversión rinde 118% anual pero los precios suben 140%, necesitás más pesos para comprar lo mismo que antes.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué inflación usar si calculo en dólares? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Si tu inversión es en dólares (por ejemplo, bonos del Tesoro de EE.UU. o ETFs), usá la inflación de EE.UU. como referencia. Históricamente ronda el 2.5–3.5% anual, aunque en 2022 llegó a 8%. Para el largo plazo, 3% es una estimación conservadora y razonable.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 2. CUOTAS VS CONTADO
+  // ===================================================================
+  'cuotas-vs-contado': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>💳 Cuotas vs Contado</h1>
+      <p>Determiná si conviene financiarte en cuotas o pagar de contado, considerando el costo real del dinero.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Precio de contado <span class="hint">(ARS)</span></label>
+            <input id="cv-contado" type="number" value="500000" placeholder="500000"></div>
+          <div class="field"><label>Precio en cuotas <span class="hint">(ARS, total)</span></label>
+            <input id="cv-total" type="number" value="720000" placeholder="720000"></div>
+          <div class="field"><label>Cantidad de cuotas</label>
+            <input id="cv-cuotas" type="number" value="12" min="1" max="120"></div>
+          <div class="field"><label>TNA alternativa de inversión <span class="hint">(%)</span></label>
+            <input id="cv-tna" type="number" value="118" step="0.1"></div>
+          <div class="field"><label>Inflación anual esperada <span class="hint">(%)</span></label>
+            <input id="cv-inf" type="number" value="140" step="0.1"></div>
+          <button class="btn" onclick="calcCV()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Análisis</div>
+          <div id="cv-results" class="empty-state"><div class="big">💳</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Comparación visual</div>
+            <div id="cv-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>¿Cuándo conviene pagar en cuotas?</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Cuándo es mejor pagar en cuotas? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Pagar en cuotas conviene cuando la tasa implícita de financiamiento es menor que la inflación esperada. En Argentina, con inflación alta, muchas veces las cuotas "fijas" se licúan: en términos reales pagás menos con el tiempo.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es la tasa implícita? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Es la TNA que el vendedor te está cobrando al ofrecer cuotas. Se calcula comparando el precio de contado con el total en cuotas usando la fórmula de valor presente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 3. COMPRAR VS ALQUILAR
+  // ===================================================================
+  'comprar-vs-alquilar': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>🏠 Comprar vs Alquilar</h1>
+      <p>Analizá el punto de equilibrio entre comprar y alquilar, considerando la apreciación del inmueble y el costo de oportunidad.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Precio de la propiedad <span class="hint">(USD)</span></label>
+            <input id="ca-precio" type="number" value="80000" placeholder="80000"></div>
+          <div class="field"><label>Alquiler mensual <span class="hint">(USD)</span></label>
+            <input id="ca-alquiler" type="number" value="600" placeholder="600"></div>
+          <div class="field"><label>Inflación del alquiler anual <span class="hint">(%)</span></label>
+            <input id="ca-inf-alq" type="number" value="30" step="0.1"></div>
+          <div class="field"><label>Apreciación anual del inmueble <span class="hint">(%)</span></label>
+            <input id="ca-apreciacion" type="number" value="3" step="0.1"></div>
+          <div class="field"><label>Rendimiento alternativo <span class="hint">(% anual en USD)</span></label>
+            <input id="ca-rend" type="number" value="6" step="0.1"></div>
+          <div class="field"><label>Gastos compra+venta <span class="hint">(% del valor)</span></label>
+            <input id="ca-gastos" type="number" value="7" step="0.1"></div>
+          <div class="field"><label>Horizonte de análisis <span class="hint">(años)</span></label>
+            <input id="ca-años" type="number" value="10" min="1" max="30"></div>
+          <button class="btn" onclick="calcCA()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="ca-results" class="empty-state"><div class="big">🏠</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Costo acumulado comparado</div>
+            <div id="ca-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Comprar vs alquilar en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Cuál es la regla del price-to-rent? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El ratio precio/alquiler anual indica cuántos años de alquiler equivalen al precio de compra. En mercados saludables suele ser 15-20x. En Argentina, este ratio varía mucho según la zona y el tipo de cambio.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 4. PLAZO FIJO
+  // ===================================================================
+  'plazo-fijo': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>🏦 Plazo Fijo vs Inflación</h1>
+      <p>Calculá si tu plazo fijo te genera ganancia real o estás perdiendo poder adquisitivo frente a la inflación.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Capital a invertir <span class="hint">(ARS)</span></label>
+            <input id="pf-capital" type="number" value="1000000"></div>
+          <div class="field"><label>TNA del plazo fijo <span class="hint">(%)</span></label>
+            <input id="pf-tna" type="number" value="118" step="0.1"></div>
+          <div class="field"><label>Inflación anual esperada <span class="hint">(%)</span></label>
+            <input id="pf-inf" type="number" value="140" step="0.1"></div>
+          <div class="field"><label>Plazo <span class="hint">(días)</span></label>
+            <input id="pf-dias" type="number" value="30" min="30" max="365"></div>
+          <div class="field"><label>¿Renovar automáticamente? <span class="hint">(veces)</span></label>
+            <input id="pf-renovaciones" type="number" value="12" min="1" max="60"></div>
+          <button class="btn" onclick="calcPF()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="pf-results" class="empty-state"><div class="big">🏦</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Nominal vs Real acumulado</div>
+            <div id="pf-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div id="pf-table-wrap" style="margin-top:12px"></div>
+        <div class="faq-section">
+          <h2>Plazo fijo en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Conviene el plazo fijo en Argentina? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Depende del contexto. Cuando la TNA supera a la inflación, hay ganancia real. En períodos de alta inflación como Argentina, a menudo el rendimiento real es negativo. El plazo fijo UVA ajusta por CER y puede ser mejor opción para no perder contra la inflación.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es el plazo fijo UVA? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El plazo fijo UVA ajusta el capital por el índice CER (que sigue al IPC), más una tasa adicional de alrededor del 1% anual. Garantiza no perder contra la inflación, aunque requiere un plazo mínimo de 90 días.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 5. CUÁNDO LLEGO A $X
+  // ===================================================================
+  'cuando-llego': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>🎯 ¿Cuándo llego a mi meta?</h1>
+      <p>Proyectá en cuántos meses alcanzás tu objetivo de ahorro con aportes regulares e interés compuesto.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Meta de ahorro <span class="hint">(ARS)</span></label>
+            <input id="cl-meta" type="number" value="5000000" placeholder="5000000"></div>
+          <div class="field"><label>Capital inicial <span class="hint">(ARS)</span></label>
+            <input id="cl-capital" type="number" value="500000"></div>
+          <div class="field"><label>Aporte mensual <span class="hint">(ARS)</span></label>
+            <input id="cl-aporte" type="number" value="200000"></div>
+          <div class="field"><label>TNA de inversión <span class="hint">(%)</span></label>
+            <input id="cl-tna" type="number" value="118" step="0.1"></div>
+          <div class="field"><label>Inflación anual <span class="hint">(%)</span></label>
+            <input id="cl-inf" type="number" value="140" step="0.1"></div>
+          <div class="field"><label>Ajuste mensual del aporte <span class="hint">(% mensual)</span></label>
+            <input id="cl-ajuste" type="number" value="0" step="0.1" placeholder="0 = sin ajuste"></div>
+          <button class="btn" onclick="calcCL()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Proyección</div>
+          <div id="cl-results" class="empty-state"><div class="big">🎯</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Evolución hacia la meta</div>
+            <div id="cl-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Ahorro con objetivo en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Por qué ajustar el aporte mensualmente? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Con inflación alta, un aporte fijo en pesos cada vez representa menos poder adquisitivo. Ajustar el aporte mensualmente (por ejemplo al ritmo de la inflación) mantiene el esfuerzo de ahorro constante en términos reales.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 6. NOMINAL VS REAL
+  // ===================================================================
+  'nominal-vs-real': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>📊 Rendimiento Nominal vs Real</h1>
+      <p>Convertí tasas nominales a reales usando la ecuación de Fisher. Descubrí cuánto ganás (o perdés) en términos de poder adquisitivo.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>TNA <span class="hint">(tasa nominal anual %)</span></label>
+            <input id="nr-tna" type="number" value="118" step="0.1"></div>
+          <div class="field"><label>Inflación anual <span class="hint">(%)</span></label>
+            <input id="nr-inf" type="number" value="140" step="0.1"></div>
+          <div class="field"><label>Capital <span class="hint">(ARS)</span></label>
+            <input id="nr-capital" type="number" value="1000000"></div>
+          <button class="btn" onclick="calcNR()">Calcular →</button>
+        </div>
+        <div style="margin-top:12px" class="panel">
+          <div class="panel-title">// Conversiones de tasa</div>
+          <div id="nr-tasas" class="empty-state"><div class="big">📊</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="nr-results" class="empty-state"><div class="big">📊</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Comparación visual</div>
+            <div id="nr-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Tasa nominal vs real</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es la ecuación de Fisher? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">La ecuación de Fisher establece que: (1 + r_real) = (1 + r_nominal) / (1 + inflación). Es la fórmula correcta para calcular tasas reales. La versión simplificada r_real ≈ r_nominal - inflación introduce error, especialmente con tasas altas como las de Argentina.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué diferencia hay entre TNA y TEA? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">La TNA (Tasa Nominal Anual) no tiene en cuenta la capitalización de intereses. La TEA (Tasa Efectiva Anual) sí incluye el efecto del interés compuesto. Para un plazo fijo a 30 días que se renueva, la TEA es mayor que la TNA.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 7. RENTABILIDAD ALQUILER
+  // ===================================================================
+  'rentabilidad-alquiler': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>🏘️ Rentabilidad del Alquiler</h1>
+      <p>Calculá el rendimiento bruto y neto de una propiedad en alquiler y comparalo con otras inversiones.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Valor de la propiedad <span class="hint">(USD)</span></label>
+            <input id="ra-valor" type="number" value="80000"></div>
+          <div class="field"><label>Alquiler mensual <span class="hint">(USD)</span></label>
+            <input id="ra-alquiler" type="number" value="600"></div>
+          <div class="field"><label>Gastos anuales (impuestos, expensas, mant.) <span class="hint">(USD)</span></label>
+            <input id="ra-gastos" type="number" value="2400"></div>
+          <div class="field"><label>Meses vacíos por año <span class="hint">(vacancia)</span></label>
+            <input id="ra-vacancia" type="number" value="1" min="0" max="12" step="0.5"></div>
+          <div class="field"><label>Tipo de cambio <span class="hint">(ARS/USD)</span></label>
+            <input id="ra-tc" type="number" value="1000"></div>
+          <button class="btn" onclick="calcRA()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="ra-results" class="empty-state"><div class="big">🏘️</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Desglose de rentabilidad</div>
+            <div id="ra-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Rentabilidad inmobiliaria en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Cuál es la rentabilidad típica de alquiler en Argentina? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Históricamente la rentabilidad bruta de alquiler en CABA ronda el 3-5% anual en dólares. Con la normalización del mercado post ley de alquileres 2023, los precios y condiciones están ajustándose.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 8. DEVALUACIÓN
+  // ===================================================================
+  'devaluacion': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>💵 Simulador de Devaluación</h1>
+      <p>Proyectá cómo impacta una devaluación del tipo de cambio en el valor de tus ahorros en pesos y dólares.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Ahorro en ARS <span class="hint">(pesos)</span></label>
+            <input id="dev-ars" type="number" value="5000000"></div>
+          <div class="field"><label>Ahorro en USD <span class="hint">(dólares)</span></label>
+            <input id="dev-usd" type="number" value="5000"></div>
+          <div class="field"><label>Tipo de cambio actual <span class="hint">(ARS/USD)</span></label>
+            <input id="dev-tc-actual" type="number" value="1000"></div>
+          <div class="field"><label>Escenario A: Devaluación <span class="hint">(%)</span></label>
+            <input id="dev-dev-a" type="number" value="30" step="1"></div>
+          <div class="field"><label>Escenario B: Devaluación <span class="hint">(%)</span></label>
+            <input id="dev-dev-b" type="number" value="60" step="1"></div>
+          <div class="field"><label>Escenario C: Devaluación <span class="hint">(%)</span></label>
+            <input id="dev-dev-c" type="number" value="100" step="1"></div>
+          <div class="field"><label>TNA inversión en ARS <span class="hint">(rendimiento de los pesos %)</span></label>
+            <input id="dev-tna" type="number" value="118" step="0.1"></div>
+          <div class="field"><label>Horizonte <span class="hint">(meses)</span></label>
+            <input id="dev-meses" type="number" value="6" min="1" max="24"></div>
+          <button class="btn" onclick="calcDev()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Escenarios</div>
+          <div id="dev-results" class="empty-state"><div class="big">💵</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Comparación de escenarios</div>
+            <div id="dev-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Devaluación en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Cómo impacta la devaluación en los ahorros? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Una devaluación del peso frente al dólar significa que cada peso vale menos en términos de dólares. Si tenés pesos y hay una devaluación del 50%, tu ahorro en USD se reduce a la mitad medido en dólares, aunque nominalmente (en pesos) sigue igual.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Conviene "dolarizarse"? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Depende del contexto. Si la tasa en pesos supera la devaluación esperada, puede convenir mantenerse en ARS ("carry trade"). Si la devaluación esperada supera la tasa, conviene dolarizarse. Esta calculadora te ayuda a evaluar ambos escenarios.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 9. HIPOTECARIO
+  // ===================================================================
+  'hipotecario': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>🏗️ Simulador Hipotecario</h1>
+      <p>Calculá la cuota mensual, intereses totales y tabla de amortización de tu crédito hipotecario.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Monto del crédito <span class="hint">(ARS)</span></label>
+            <input id="hip-monto" type="number" value="20000000"></div>
+          <div class="field"><label>TNA del crédito <span class="hint">(%)</span></label>
+            <input id="hip-tna" type="number" value="75" step="0.1"></div>
+          <div class="field"><label>Plazo <span class="hint">(meses)</span></label>
+            <input id="hip-plazo" type="number" value="120" min="12" max="360"></div>
+          <div class="field"><label>Inflación anual esperada <span class="hint">(% para calcular cuota real)</span></label>
+            <input id="hip-inf" type="number" value="140" step="0.1"></div>
+          <button class="btn" onclick="calcHip()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="hip-results" class="empty-state"><div class="big">🏗️</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Evolución del saldo</div>
+            <div id="hip-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div id="hip-table-wrap" style="margin-top:12px"></div>
+        <div class="faq-section">
+          <h2>Créditos hipotecarios en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es un crédito UVA? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Los créditos UVA (Unidad de Valor Adquisitivo) ajustan el capital por inflación (CER). Las cuotas son inicialmente más bajas, pero el capital adeudado se actualiza. En períodos de alta inflación, el saldo puede crecer en pesos aunque se sigan pagando cuotas regularmente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 10. PODER ADQUISITIVO
+  // ===================================================================
+  'poder-adquisitivo': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>📉 Poder Adquisitivo en el Tiempo</h1>
+      <p>Calculá cuánto vale hoy un monto del pasado (o del futuro) según la inflación acumulada.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Monto a calcular <span class="hint">(ARS)</span></label>
+            <input id="pa-monto" type="number" value="1000000"></div>
+          <div class="field"><label>Inflación anual promedio <span class="hint">(%)</span></label>
+            <input id="pa-inf" type="number" value="140" step="0.1"></div>
+          <div class="field"><label>Período de análisis <span class="hint">(años)</span></label>
+            <input id="pa-años" type="number" value="5" min="1" max="30"></div>
+          <div class="field"><label>¿Calcular hacia? <span class="hint"></span></label>
+            <select id="pa-dir">
+              <option value="futuro">Futuro (qué vale hoy ese monto en X años)</option>
+              <option value="pasado">Pasado (qué poder tenía ese monto hace X años)</option>
+            </select>
+          </div>
+          <button class="btn" onclick="calcPA()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="pa-results" class="empty-state"><div class="big">📉</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Erosión del poder adquisitivo</div>
+            <div id="pa-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Inflación y poder adquisitivo</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Por qué importa el poder adquisitivo? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El poder adquisitivo mide cuántos bienes y servicios podés comprar con un monto dado. Con inflación del 140% anual, en un año necesitás el doble de pesos para comprar lo mismo. En 5 años, sin invertir, ese monto original comprará una fracción mínima de lo que compraba.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 11. COMPARADOR DE INVERSIONES
+  // ===================================================================
+  'comparador-inversiones': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>⚖️ Comparador de Inversiones</h1>
+      <p>Compará dos alternativas de inversión con distintas tasas y plazos para ver cuál genera mayor rendimiento neto.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros comunes</div>
+          <div class="field"><label>Capital inicial <span class="hint">(ARS)</span></label>
+            <input id="ci-capital" type="number" value="1000000"></div>
+          <div class="field"><label>Horizonte <span class="hint">(meses)</span></label>
+            <input id="ci-meses" type="number" value="12" min="1" max="120"></div>
+          <div class="field"><label>Inflación anual <span class="hint">(%)</span></label>
+            <input id="ci-inf" type="number" value="140" step="0.1"></div>
+          <hr class="divider">
+          <div class="panel-title">// Inversión A</div>
+          <div class="field"><label>Nombre</label>
+            <input id="ci-nom-a" type="text" value="Plazo fijo" placeholder="ej: Plazo fijo"></div>
+          <div class="field"><label>TNA <span class="hint">(%)</span></label>
+            <input id="ci-tna-a" type="number" value="118" step="0.1"></div>
+          <hr class="divider">
+          <div class="panel-title">// Inversión B</div>
+          <div class="field"><label>Nombre</label>
+            <input id="ci-nom-b" type="text" value="Fondo money market" placeholder="ej: Fondo común"></div>
+          <div class="field"><label>TNA <span class="hint">(%)</span></label>
+            <input id="ci-tna-b" type="number" value="130" step="0.1"></div>
+          <button class="btn" onclick="calcCI()">Comparar →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="ci-results" class="empty-state"><div class="big">⚖️</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// A vs B en el tiempo</div>
+            <div id="ci-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h2>Comparar inversiones en Argentina</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué diferencia hay entre FCI y plazo fijo? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">Los Fondos Comunes de Inversión (FCI) money market invierten en activos de corto plazo y tienen liquidez inmediata. El plazo fijo tiene fecha de vencimiento y penalidades por rescate anticipado. Los FCI suelen tener tasas similares o mejores, con mayor flexibilidad.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  // ===================================================================
+  // 12. COSTO REAL DEL PRÉSTAMO
+  // ===================================================================
+  'costo-prestamo': () => `
+    <button class="back-btn" onclick="showHome()">← Volver</button>
+    <div class="tool-header">
+      <h1>💸 Costo Real del Préstamo (CFT)</h1>
+      <p>Calculá el costo total de un préstamo incluyendo intereses, seguros y gastos administrativos.</p>
+    </div>
+    <div class="tool-layout">
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Parámetros</div>
+          <div class="field"><label>Monto del préstamo <span class="hint">(ARS)</span></label>
+            <input id="cp-monto" type="number" value="500000"></div>
+          <div class="field"><label>TNA del préstamo <span class="hint">(%)</span></label>
+            <input id="cp-tna" type="number" value="85" step="0.1"></div>
+          <div class="field"><label>Cantidad de cuotas</label>
+            <input id="cp-cuotas" type="number" value="24" min="1" max="120"></div>
+          <div class="field"><label>Seguro mensual <span class="hint">(ARS por cuota)</span></label>
+            <input id="cp-seguro" type="number" value="2000" placeholder="0"></div>
+          <div class="field"><label>Gastos de otorgamiento <span class="hint">(ARS, único pago)</span></label>
+            <input id="cp-gastos" type="number" value="5000" placeholder="0"></div>
+          <div class="field"><label>Inflación anual <span class="hint">(%)</span></label>
+            <input id="cp-inf" type="number" value="140" step="0.1"></div>
+          <button class="btn" onclick="calcCP()">Calcular →</button>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-title">// Resultado</div>
+          <div id="cp-results" class="empty-state"><div class="big">💸</div>Completá los datos</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-title">// Composición del costo total</div>
+            <div id="cp-chart-wrap" class="empty-state"><div class="big">📊</div></div>
+          </div>
+        </div>
+        <div id="cp-table-wrap" style="margin-top:12px"></div>
+        <div class="faq-section">
+          <h2>CFT y costo real de créditos</h2>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Qué es el CFT? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El Costo Financiero Total (CFT) incluye la TNA más todos los gastos adicionales: seguros de vida, seguros de desempleo, gastos de otorgamiento, sellados y comisiones. Es la tasa real que pagás por el préstamo. Por ley, los bancos en Argentina están obligados a informarlo.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">¿Cómo se compara la TNA con el CFT? <span class="faq-arrow">▼</span></button>
+            <div class="faq-a">El CFT siempre es mayor que la TNA porque incluye gastos adicionales. La diferencia puede ser significativa: un préstamo con TNA del 85% puede tener un CFT del 100% o más si se suman seguros y gastos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+};
+
+
+// =====================================================================
+//  CÁLCULOS
+// =====================================================================
+
+// --- 1. INTERÉS COMPUESTO ---
+let icMoneda = 'ARS';
+
+function icAplicarTasa(val) {
+  document.getElementById('ic-tna').value = val;
+}
+
+function icToggleCap() {
+  const cap = document.getElementById('ic-cap').value;
+  const nota = document.getElementById('ic-cap-nota');
+  if (cap === 'mensual') {
+    nota.textContent = '💡 Mensual = el interés se reinvierte cada mes. Ideal para plazo fijo, FCI y cuentas remuneradas.';
+  } else {
+    nota.textContent = '💡 Anual = el interés se reinvierte una sola vez por año. Más representativo para S&P500 y bonos.';
+  }
+}
+
+function icSetMoneda(m) {
+  icMoneda = m;
+  const isUSD = m === 'USD';
+
+  const btnARS = document.getElementById('ic-btn-ars');
+  const btnUSD = document.getElementById('ic-btn-usd');
+  if (!btnARS || !btnUSD) return;
+
+  btnARS.style.border = isUSD ? '1px solid var(--border)' : '1px solid var(--accent)';
+  btnARS.style.background = isUSD ? 'none' : 'rgba(0,229,160,0.08)';
+  btnARS.style.color = isUSD ? 'var(--text2)' : 'var(--accent)';
+  btnUSD.style.border = isUSD ? '1px solid var(--accent)' : '1px solid var(--border)';
+  btnUSD.style.background = isUSD ? 'rgba(0,229,160,0.08)' : 'none';
+  btnUSD.style.color = isUSD ? 'var(--accent)' : 'var(--text2)';
+
+  document.getElementById('ic-label-capital').textContent = isUSD ? '(USD)' : '(ARS)';
+  document.getElementById('ic-label-aporte').textContent = isUSD ? '(USD, opcional)' : '(ARS, opcional)';
+
+  // Sugerencias inflación y tasa
+  document.getElementById('ic-inf-sugerencia').style.display = isUSD ? 'block' : 'none';
+  document.getElementById('ic-sugerencias-tasa').style.display = isUSD ? 'flex' : 'none';
+
+  if (isUSD) {
+    document.getElementById('ic-capital').value = 10000;
+    document.getElementById('ic-tna').value = 10;
+    document.getElementById('ic-inf').value = 3;
+    document.getElementById('ic-aporte').value = 0;
+    document.getElementById('ic-cap').value = 'anual';
+    icToggleCap();
+  } else {
+    document.getElementById('ic-capital').value = 1000000;
+    document.getElementById('ic-tna').value = 118;
+    document.getElementById('ic-inf').value = 140;
+    document.getElementById('ic-aporte').value = 0;
+    document.getElementById('ic-cap').value = 'mensual';
+    icToggleCap();
+  }
+}
+
+function calcIC() {
+  const capital = parseFloat(document.getElementById('ic-capital').value) || 0;
+  const tna     = parseFloat(document.getElementById('ic-tna').value) / 100;
+  const inf     = parseFloat(document.getElementById('ic-inf').value) / 100;
+  const meses   = parseInt(document.getElementById('ic-meses').value) || 12;
+  const aporte  = parseFloat(document.getElementById('ic-aporte').value) || 0;
+  const isUSD   = icMoneda === 'USD';
+  const simbolo = isUSD ? 'USD ' : '$ ';
+  const dec     = isUSD ? 2 : 0;
+  const fmtVal  = v => simbolo + fmt(v, dec);
+
+  const tea = tna;
+  const cap = document.getElementById('ic-cap')?.value || 'mensual';
+
+  // Capitalización mensual: el usuario ingresa TNA, la tasa mensual es TNA/12
+  //   $1000 al 30% TNA → tm = 2.5% mensual → capital final = $1000 × (1.025)^12 = $1344 (TEA 34.4%)
+  // Capitalización anual: el usuario ingresa lo que gana en exactamente 1 año
+  //   $1000 al 30% → capital final = $1300 exactos
+  const tm = cap === 'mensual'
+    ? tna / 12          // TNA dividida en 12 partes iguales
+    : tna;              // tasa anual directa, se aplica linealmente
+
+  const im = Math.pow(1 + inf, 1/12) - 1; // inflación mensual siempre compuesta
+
+  // ── CÁLCULO MES A MES ────────────────────────────────────────────────
+  // Convención: el aporte ingresa a INICIO de cada mes, por lo que
+  // el aporte del mes 1 genera interés durante (meses - 1) meses,
+  // el del mes 2 durante (meses - 2), ..., el del mes M durante 0 meses.
+  //
+  // Interés del capital:     capital × [(1+tm)^M - 1]
+  // Interés del aporte m:    aporte  × [(1+tm)^(M-m) - 1]   para m = 1..M
+  //
+  // La tabla refleja el saldo acumulado mes a mes.
+
+  const rows = [];
+  let saldo = capital;
+
+  for (let m = 1; m <= meses; m++) {
+    // El aporte entra al inicio del mes, antes de que corra el interés
+    saldo += aporte;
+
+    let interes = 0;
+    if (cap === 'mensual') {
+      // Capitalización mensual: tm = (1+tea)^(1/12) - 1
+      interes = saldo * tm;
+      saldo += interes;
+    } else {
+      // Capitalización anual con crecimiento lineal dentro del año:
+      // El interés anual (tea) se distribuye en 12 partes iguales sobre
+      // el capital que había al inicio de ese año. Así el crecimiento
+      // es suave mes a mes y al mes 12 el total acumulado es exactamente tea%.
+      //
+      // capital_inicio_año = saldo al mes (año-1)*12, antes de aportes del año
+      // interés mensual = capital_inicio_año × tea / 12
+      const mesEnAnio = ((m - 1) % 12); // 0..11
+      if (mesEnAnio === 0) {
+        // Guardamos el capital al inicio de este año (ya incluye el aporte del mes)
+        window._icCapInicioAnio = saldo;
+      }
+      interes = (window._icCapInicioAnio || saldo) * tea / 12;
+      saldo += interes;
+    }
+
+    const saldoReal = saldo / Math.pow(1 + im, m);
+    rows.push({ mes: m, saldo, saldoReal, interes });
+  }
+
+  const final        = rows[rows.length - 1];
+  const totalInvertido = capital + aporte * meses; // todo lo que pusiste de tu bolsillo
+
+  // ── GANANCIAS (solo intereses, excluye aportes y capital) ────────────
+  // Nominal: lo que generaron los intereses puros
+  const gananciaNom  = final.saldo - totalInvertido;
+
+  // Real: deflactamos cada aporte al momento 0 para saber cuánto "vale"
+  // lo que pusiste en términos de poder adquisitivo actual
+  let totalInvertidoReal = capital; // el capital inicial no se deflacta (es momento 0)
+  for (let m = 1; m <= meses; m++) {
+    totalInvertidoReal += aporte / Math.pow(1 + im, m);
+  }
+  const gananciaReal = final.saldoReal - totalInvertidoReal;
+
+  // % sobre el total invertido (no solo sobre capital inicial)
+  const gananciaNomPct  = totalInvertido > 0 ? (gananciaNom  / totalInvertido) * 100 : 0;
+  const gananciaRealPct = totalInvertido > 0 ? (gananciaReal / totalInvertido) * 100 : 0;
+  const isNegReal       = gananciaReal < 0;
+
+  // Tasa real anual (Fisher) — independiente de los aportes
+  const trealAnual = tasaReal(tea, inf) * 100;
+
+  // ── PANEL DE RESULTADOS ──────────────────────────────────────────────
+  const rp = document.getElementById('ic-results-panel');
+  const hayAportes = aporte > 0;
+
+  rp.innerHTML = `
+    <div class="panel">
+      <div class="panel-title">// Resumen</div>
+      <div class="result-grid">
+
+        <div class="result-card highlight">
+          <div class="result-label">Capital final nominal</div>
+          <div class="result-value green">${fmtVal(final.saldo)}</div>
+          <div class="result-sub">Capital + aportes + intereses</div>
+        </div>
+
+        <div class="result-card ${isNegReal ? 'danger' : 'highlight'}">
+          <div class="result-label">Capital final real</div>
+          <div class="result-value ${isNegReal ? 'red' : 'green'}">${fmtVal(final.saldoReal)}</div>
+          <div class="result-sub">Poder adquisitivo equivalente</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Ganancia nominal (intereses)</div>
+          <div class="result-value">${fmtVal(gananciaNom)}</div>
+          <div class="result-sub">+${fmtPct(gananciaNomPct,1)} sobre total invertido</div>
+        </div>
+
+        <div class="result-card ${isNegReal ? 'danger' : ''}">
+          <div class="result-label">Ganancia real (intereses)</div>
+          <div class="result-value ${isNegReal ? 'red' : 'green'}">${fmtVal(gananciaReal)}</div>
+          <div class="result-sub">${gananciaRealPct >= 0 ? '+' : ''}${fmtPct(gananciaRealPct,1)} sobre total invertido</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Tasa real anual (Fisher)</div>
+          <div class="result-value ${trealAnual < 0 ? 'red' : 'green'}">${fmtPct(trealAnual,2)}</div>
+          <div class="result-sub">${trealAnual < 0 ? 'Perdés poder adquisitivo' : 'Ganás poder adquisitivo'}</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-label">Total invertido</div>
+          <div class="result-value">${fmtVal(totalInvertido)}</div>
+          <div class="result-sub">Capital${hayAportes ? ` + ${meses} aportes de ${fmtVal(aporte)}` : ''}</div>
+        </div>
+
+      </div>
+
+      ${hayAportes ? `
+      <div class="info-box" style="margin-bottom:10px">
+        <strong>ℹ️ Aportes:</strong> Cada aporte entra a inicio de mes y capitaliza por los meses restantes.
+        El aporte del mes 1 genera interés durante ${meses-1} meses,
+        el del mes 2 durante ${meses-2}, y así hasta el último que no genera interés adicional.
+        La <strong>ganancia</strong> mostrada es solo lo generado por el interés, sin contar lo que vos aportaste.
+      </div>` : ''}
+      <div class="info-box" style="font-size:11px;margin-bottom:10px">
+        <strong>Capitalización ${cap === 'mensual' ? 'mensual (TNA)' : 'anual'}:</strong>
+        ${cap === 'mensual'
+          ? `TNA ${fmtPct(tna*100,1)} → tasa mensual ${fmtPct(tm*100,4)} → TEA efectiva ${fmtPct((Math.pow(1+tm,12)-1)*100,2)}. El interés se reinvierte cada mes, por eso el resultado final supera la TNA.`
+          : `Tasa anual ${fmtPct(tea*100,1)} aplicada linealmente. $1 crece exactamente a $${(1+tea).toFixed(4)} en 12 meses. Sin efecto de capitalización intermedia.`
+        }
+      </div>
+
+      ${isNegReal
+        ? `<div class="warn-box"><strong>⚠️ Rendimiento real negativo:</strong> La inflación (${fmtPct(inf*100,1)}/año) supera la tasa (${fmtPct(tea*100,1)}/año). Crecés en números pero perdés poder de compra.</div>`
+        : `<div class="info-box"><strong>✅ Rendimiento real positivo:</strong> Tu inversión supera la inflación. Tasa real: ${fmtPct(trealAnual,2)}/año.</div>`
+      }
+    </div>`;
+
+  // ── GRÁFICO ──────────────────────────────────────────────────────────
+  const step    = Math.max(1, Math.floor(meses / 24));
+  const visRows = rows.filter((_, i) => i % step === 0 || i === rows.length - 1);
+  const labels  = visRows.map(r => 'M' + r.mes);
+  const saldos  = visRows.map(r => isUSD ? parseFloat(r.saldo.toFixed(2))     : Math.round(r.saldo));
+  const reales  = visRows.map(r => isUSD ? parseFloat(r.saldoReal.toFixed(2)) : Math.round(r.saldoReal));
+
+  // Línea de referencia: lo que tendrías sin ningún interés (solo capital + aportes acumulados)
+  const sinInteres = visRows.map(r => {
+    const base = capital + aporte * r.mes;
+    return isUSD ? parseFloat(base.toFixed(2)) : Math.round(base);
+  });
+
+  document.getElementById('ic-chart-wrap').innerHTML = '<canvas id="ic-chart"></canvas>';
+  document.getElementById('ic-chart-nota').style.display = 'block';
+  document.getElementById('ic-nota-moneda').textContent = icMoneda;
+
+  renderChart('ic-chart', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: `Nominal (${icMoneda})`,
+          data: saldos,
+          borderColor: '#00e5a0',
+          backgroundColor: 'rgba(0,229,160,0.07)',
+          tension: 0.4, fill: true, pointRadius: 2
+        },
+        {
+          label: 'Real (poder adquisitivo)',
+          data: reales,
+          borderColor: '#ff6b35',
+          backgroundColor: 'rgba(255,107,53,0.07)',
+          tension: 0.4, fill: true, pointRadius: 2,
+          borderDash: [5, 5]
+        },
+        ...(hayAportes ? [{
+          label: 'Sin interés (ref.)',
+          data: sinInteres,
+          borderColor: '#4d5668',
+          borderDash: [3, 3],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+        }] : []),
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        y: {
+          grid: { color: '#1f2530' },
+          ticks: { callback: v => simbolo + fmt(v, dec) }
+        },
+        x: { grid: { color: '#1f2530' } }
+      }
+    }
+  });
+
+  // ── TABLA ────────────────────────────────────────────────────────────
+  const tblRows = rows.map(r =>
+    `<tr>
+      <td>${r.mes}</td>
+      <td>${fmtVal(r.saldo)}</td>
+      <td>${fmtVal(r.saldoReal)}</td>
+      <td>${fmtVal(r.interes)}</td>
+      ${hayAportes ? `<td>${fmtVal(aporte)}</td>` : ''}
+    </tr>`
+  ).join('');
+
+  document.getElementById('ic-table-wrap').innerHTML = `
+    <div class="table-wrap">
+      <button class="table-toggle" onclick="toggleTable(this)">Tabla mes a mes <span class="arrow">▼</span></button>
+      <div class="table-body">
+        <table>
+          <thead><tr>
+            <th>Mes</th><th>Saldo Nominal</th><th>Saldo Real</th><th>Interés generado</th>
+            ${hayAportes ? '<th>Aporte del mes</th>' : ''}
+          </tr></thead>
+          <tbody>${tblRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// --- 2. CUOTAS VS CONTADO ---
+function calcCV() {
+  const contado = parseFloat(document.getElementById('cv-contado').value) || 0;
+  const totalCuotas = parseFloat(document.getElementById('cv-total').value) || 0;
+  const nCuotas = parseInt(document.getElementById('cv-cuotas').value) || 12;
+  const tna = parseFloat(document.getElementById('cv-tna').value) / 100;
+  const inf = parseFloat(document.getElementById('cv-inf').value) / 100;
+
+  const cuotaMensual = totalCuotas / nCuotas;
+  const tm = tnaAMensual(tna);
+  const im = tnaAMensual(inf);
+
+  // Costo financiero implícito: TIR aproximada
+  // VP de cuotas = contado → buscar tasa implícita por iteración
+  let low = 0, high = 1, implícita = 0;
+  for (let i = 0; i < 100; i++) {
+    const mid = (low + high) / 2;
+    let vp = 0;
+    for (let k = 1; k <= nCuotas; k++) vp += cuotaMensual / Math.pow(1 + mid, k);
+    if (vp > contado) low = mid; else high = mid;
+    implícita = mid;
+  }
+  const tnaimplicita = implícita * 12 * 100;
+
+  // Si invierto el contado, ¿qué gano?
+  const saldoInversion = contado * Math.pow(1 + tm, nCuotas);
+  const costoRealCuotas = totalCuotas / Math.pow(1 + im, nCuotas / 2); // valor actual de las cuotas
+  const diferencia = totalCuotas - saldoInversion;
+  const convieneCuotas = implícita < im; // si tasa implícita < inflación, conviene cuotas
+
+  document.getElementById('cv-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">Precio contado</div>
+        <div class="result-value">${fmtARS(contado)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Total en cuotas</div>
+        <div class="result-value">${fmtARS(totalCuotas)}</div>
+        <div class="result-sub">${nCuotas} cuotas de ${fmtARS(cuotaMensual)}</div>
+      </div>
+      <div class="result-card warn">
+        <div class="result-label">TNA implícita del financiamiento</div>
+        <div class="result-value yellow">${fmtPct(tnaimplicita, 1)}</div>
+      </div>
+      <div class="result-card ${convieneCuotas ? 'highlight' : 'danger'}">
+        <div class="result-label">¿Conviene en cuotas?</div>
+        <div class="result-value ${convieneCuotas ? 'green' : 'red'}">${convieneCuotas ? 'SÍ ✓' : 'NO ✗'}</div>
+        <div class="result-sub">${convieneCuotas ? 'Tasa < inflación: te licuás' : 'Tasa > inflación: pagás más'}</div>
+      </div>
+    </div>
+    ${convieneCuotas
+      ? `<div class="info-box"><strong>✅ Conviene financiarse:</strong> La TNA implícita del financiamiento (${fmtPct(tnaimplicita,1)}) es menor que la inflación esperada (${fmtPct(inf*100,1)}). Las cuotas se "licúan" con el tiempo.</div>`
+      : `<div class="warn-box"><strong>⚠️ Mejor pagar de contado:</strong> La TNA implícita (${fmtPct(tnaimplicita,1)}) supera la inflación. Además, si invertís el capital al ${fmtPct(tna*100,1)} anual, tu inversión llegaría a ${fmtARS(saldoInversion)} vs ${fmtARS(totalCuotas)} en cuotas.</div>`
+    }
+  `;
+
+  document.getElementById('cv-chart-wrap').innerHTML = '<canvas id="cv-chart"></canvas>';
+  renderChart('cv-chart', {
+    type: 'bar',
+    data: {
+      labels: ['Contado', 'Total cuotas', 'Capital+interés si invertís'],
+      datasets: [{
+        label: 'ARS',
+        data: [contado, totalCuotas, Math.round(saldoInversion)],
+        backgroundColor: ['#00e5a0', '#ff6b35', '#0097ff'],
+        borderRadius: 6,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { display: false } } } }
+  });
+}
+
+// --- 3. COMPRAR VS ALQUILAR ---
+function calcCA() {
+  const precio = parseFloat(document.getElementById('ca-precio').value) || 0;
+  const alqMensual = parseFloat(document.getElementById('ca-alquiler').value) || 0;
+  const infAlq = parseFloat(document.getElementById('ca-inf-alq').value) / 100;
+  const aprec = parseFloat(document.getElementById('ca-apreciacion').value) / 100;
+  const rend = parseFloat(document.getElementById('ca-rend').value) / 100;
+  const gastosPct = parseFloat(document.getElementById('ca-gastos').value) / 100;
+  const años = parseInt(document.getElementById('ca-años').value) || 10;
+
+  // Costo de comprar: precio + gastos - valor final + costo de oportunidad del capital
+  const gastosCompra = precio * gastosPct;
+  const precioFinal = precio * Math.pow(1 + aprec, años);
+  const capitalInicial = precio + gastosCompra;
+  const rendInversion = capitalInicial * (Math.pow(1 + rend, años) - 1); // lo que ganaste si invertías
+
+  // Costos alquiler acumulados
+  let totalAlq = 0;
+  for (let a = 1; a <= años; a++) {
+    totalAlq += alqMensual * 12 * Math.pow(1 + infAlq, a - 1);
+  }
+
+  // Costo neto compra = costos de entrada + oportunidad perdida - ganancia por apreciación
+  const costoNeto = gastosCompra + rendInversion - (precioFinal - precio);
+  const ratio = precio / (alqMensual * 12);
+  const breakeven = Math.round(precio / (alqMensual * 12) * 12); // meses
+
+  document.getElementById('ca-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">Ratio precio/alquiler</div>
+        <div class="result-value">${fmt(ratio, 1)}x</div>
+        <div class="result-sub">${ratio < 15 ? '🟢 Barato comprar' : ratio < 25 ? '🟡 Neutral' : '🔴 Caro comprar'}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Alquiler acumulado (${años}a)</div>
+        <div class="result-value">${fmtARS(totalAlq)}</div>
+      </div>
+      <div class="result-card warn">
+        <div class="result-label">Costo oportunidad compra</div>
+        <div class="result-value yellow">${fmtARS(costoNeto)}</div>
+        <div class="result-sub">vs invertir el capital</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Valor propiedad en ${años}a</div>
+        <div class="result-value">${fmtARS(precioFinal)} USD</div>
+        <div class="result-sub">+${fmtPct(aprec*100,1)} anual</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>📊 Análisis:</strong> Con ratio precio/alquiler de ${fmt(ratio,1)}x, necesitás ${fmt(ratio,0)} años de alquiler para "pagar" la propiedad. Si el capital alternativo rinde ${fmtPct(rend*100,1)}/año, el costo de oportunidad es significativo.
+    </div>
+  `;
+
+  // Chart acumulado
+  const labelsAños = Array.from({length: años}, (_, i) => `Año ${i+1}`);
+  let cumAlq = 0;
+  const cumAlqArr = [], cumCompraArr = [];
+  for (let a = 1; a <= años; a++) {
+    cumAlq += alqMensual * 12 * Math.pow(1 + infAlq, a - 1);
+    const opp = capitalInicial * (Math.pow(1 + rend, a) - 1);
+    const aprecGanancia = precio * (Math.pow(1 + aprec, a) - 1);
+    cumCompraArr.push(Math.round(gastosCompra + opp - aprecGanancia));
+    cumAlqArr.push(Math.round(cumAlq));
+  }
+
+  document.getElementById('ca-chart-wrap').innerHTML = '<canvas id="ca-chart"></canvas>';
+  renderChart('ca-chart', {
+    type: 'line',
+    data: {
+      labels: labelsAños,
+      datasets: [
+        { label: 'Costo alquilar (acum.)', data: cumAlqArr, borderColor: '#ff6b35', backgroundColor: 'rgba(255,107,53,0.06)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: 'Costo neto comprar (acum.)', data: cumCompraArr, borderColor: '#0097ff', backgroundColor: 'rgba(0,151,255,0.06)', tension: 0.4, fill: true, pointRadius: 2 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { color: '#1f2530' } } } }
+  });
+}
+
+// --- 4. PLAZO FIJO ---
+function calcPF() {
+  const capital = parseFloat(document.getElementById('pf-capital').value) || 0;
+  const tna = parseFloat(document.getElementById('pf-tna').value) / 100;
+  const inf = parseFloat(document.getElementById('pf-inf').value) / 100;
+  const dias = parseInt(document.getElementById('pf-dias').value) || 30;
+  const renovaciones = parseInt(document.getElementById('pf-renovaciones').value) || 12;
+
+  const tasaPeriodo = tna * (dias / 365);
+  const infPeriodo = inf * (dias / 365);
+  const tasaRealPeriodo = tasaReal(tasaPeriodo, infPeriodo);
+  const tea = tnaATea(tna);
+
+  const rows = [];
+  let saldo = capital;
+  for (let r = 1; r <= renovaciones; r++) {
+    const interes = saldo * tasaPeriodo;
+    saldo += interes;
+    const saldoReal = saldo / Math.pow(1 + infPeriodo, r);
+    rows.push({ periodo: r, saldo, saldoReal, interes });
+  }
+
+  const final = rows[rows.length - 1];
+  const isNeg = final.saldoReal < capital;
+
+  document.getElementById('pf-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card highlight">
+        <div class="result-label">Capital final nominal</div>
+        <div class="result-value green">${fmtARS(final.saldo)}</div>
+        <div class="result-sub">Tras ${renovaciones} renovaciones</div>
+      </div>
+      <div class="result-card ${isNeg ? 'danger' : 'highlight'}">
+        <div class="result-label">Capital final real</div>
+        <div class="result-value ${isNeg ? 'red' : 'green'}">${fmtARS(final.saldoReal)}</div>
+        <div class="result-sub">${isNeg ? '⚠️ Perdés poder adquisitivo' : '✅ Ganás en términos reales'}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Tasa por período (${dias}d)</div>
+        <div class="result-value">${fmtPct(tasaPeriodo*100, 2)}</div>
+      </div>
+      <div class="result-card ${tasaRealPeriodo < 0 ? 'danger' : 'highlight'}">
+        <div class="result-label">Tasa real por período</div>
+        <div class="result-value ${tasaRealPeriodo < 0 ? 'red' : 'green'}">${fmtPct(tasaRealPeriodo*100, 2)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">TEA</div>
+        <div class="result-value">${fmtPct(tea*100, 2)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Ganancia nominal total</div>
+        <div class="result-value">${fmtARS(final.saldo - capital)}</div>
+      </div>
+    </div>
+    ${isNeg ? `<div class="warn-box"><strong>⚠️ Tasa real negativa:</strong> Tu TNA de ${fmtPct(tna*100,1)} no supera la inflación de ${fmtPct(inf*100,1)}%. Estás perdiendo poder adquisitivo.</div>` : `<div class="info-box"><strong>✅ Rendimiento real positivo:</strong> Tu plazo fijo supera la inflación en este escenario.</div>`}
+  `;
+
+  const labels = rows.map(r => 'R' + r.periodo);
+  document.getElementById('pf-chart-wrap').innerHTML = '<canvas id="pf-chart"></canvas>';
+  renderChart('pf-chart', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Nominal', data: rows.map(r => Math.round(r.saldo)), borderColor: '#ffb800', backgroundColor: 'rgba(255,184,0,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: 'Real', data: rows.map(r => Math.round(r.saldoReal)), borderColor: '#ff6b35', backgroundColor: 'rgba(255,107,53,0.08)', tension: 0.4, fill: true, pointRadius: 2, borderDash: [5,5] },
+        { label: 'Capital inicial', data: rows.map(() => capital), borderColor: '#4d5668', borderDash: [3,3], pointRadius: 0, fill: false },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { color: '#1f2530' } } } }
+  });
+
+  const tblRows = rows.map(r =>
+    `<tr><td>${r.periodo}</td><td>${fmtARS(r.saldo)}</td><td>${fmtARS(r.saldoReal)}</td><td>${fmtARS(r.interes)}</td></tr>`
+  ).join('');
+  document.getElementById('pf-table-wrap').innerHTML = `
+    <div class="table-wrap">
+      <button class="table-toggle" onclick="toggleTable(this)">Tabla de renovaciones <span class="arrow">▼</span></button>
+      <div class="table-body">
+        <table><thead><tr><th>Renov.</th><th>Nominal</th><th>Real</th><th>Interés</th></tr></thead>
+        <tbody>${tblRows}</tbody></table>
+      </div>
+    </div>`;
+}
+
+// --- 5. CUÁNDO LLEGO ---
+function calcCL() {
+  const meta = parseFloat(document.getElementById('cl-meta').value) || 0;
+  const capital = parseFloat(document.getElementById('cl-capital').value) || 0;
+  const aporteMensual = parseFloat(document.getElementById('cl-aporte').value) || 0;
+  const tna = parseFloat(document.getElementById('cl-tna').value) / 100;
+  const inf = parseFloat(document.getElementById('cl-inf').value) / 100;
+  const ajuste = parseFloat(document.getElementById('cl-ajuste').value) / 100;
+
+  const tm = tnaAMensual(tna);
+  const im = tnaAMensual(inf);
+
+  let saldo = capital;
+  let aporte = aporteMensual;
+  let mesLlegada = null;
+  const rows = [];
+  const MAX_MESES = 600;
+
+  for (let m = 1; m <= MAX_MESES; m++) {
+    saldo = saldo * (1 + tm) + aporte;
+    const saldoReal = saldo / Math.pow(1 + im, m);
+    rows.push({ mes: m, saldo, saldoReal });
+    if (saldo >= meta && !mesLlegada) mesLlegada = m;
+    aporte *= (1 + ajuste);
+    if (m > 10 && saldo < rows[m-2].saldo * 0.5) break; // diverge
+  }
+
+  const años = mesLlegada ? Math.floor(mesLlegada / 12) : null;
+  const mesesRest = mesLlegada ? mesLlegada % 12 : null;
+  const saldoActual = rows[rows.length - 1];
+
+  const display = mesLlegada
+    ? `<div class="result-card highlight" style="grid-column:1/-1">
+        <div class="result-label">Llegás a tu meta en</div>
+        <div class="result-value green">${años > 0 ? años + ' años ' : ''}${mesesRest} meses</div>
+        <div class="result-sub">Mes ${mesLlegada}</div>
+       </div>`
+    : `<div class="result-card danger" style="grid-column:1/-1">
+        <div class="result-label">No alcanzás la meta en 50 años</div>
+        <div class="result-value red">∞</div>
+        <div class="result-sub">Aumentá el aporte o la tasa</div>
+       </div>`;
+
+  document.getElementById('cl-results').innerHTML = `
+    <div class="result-grid">${display}
+      <div class="result-card">
+        <div class="result-label">Capital al mes ${Math.min(mesLlegada || 60, rows.length)}</div>
+        <div class="result-value">${fmtARS(rows[Math.min((mesLlegada || 60), rows.length) - 1]?.saldo || 0)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Meta</div>
+        <div class="result-value">${fmtARS(meta)}</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ Tip:</strong> Con un ajuste mensual del aporte del ${fmtPct((inf/12)*100, 1)} (ritmo de inflación mensual), mantenés el poder adquisitivo de tu ahorro.
+    </div>
+  `;
+
+  const maxM = Math.min(mesLlegada ? mesLlegada + 6 : 60, rows.length);
+  const step = Math.max(1, Math.floor(maxM / 24));
+  const visibleRows = rows.slice(0, maxM).filter((_, i) => i % step === 0 || i === maxM - 1);
+
+  document.getElementById('cl-chart-wrap').innerHTML = '<canvas id="cl-chart"></canvas>';
+  renderChart('cl-chart', {
+    type: 'line',
+    data: {
+      labels: visibleRows.map(r => 'M' + r.mes),
+      datasets: [
+        { label: 'Capital acumulado', data: visibleRows.map(r => Math.round(r.saldo)), borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: 'Meta', data: visibleRows.map(() => meta), borderColor: '#00e5a0', borderDash: [6,3], pointRadius: 0, fill: false },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { color: '#1f2530' } } } }
+  });
+}
+
+// --- 6. NOMINAL VS REAL ---
+function calcNR() {
+  const tna = parseFloat(document.getElementById('nr-tna').value) / 100;
+  const inf = parseFloat(document.getElementById('nr-inf').value) / 100;
+  const capital = parseFloat(document.getElementById('nr-capital').value) || 0;
+
+  const tea = tnaATea(tna);
+  const infEfec = tnaATea(inf);
+  const trealAnual = tasaReal(tea, infEfec);
+  const trealMensual = tasaReal(tnaAMensual(tna), tnaAMensual(inf));
+  const capitalNomFin = capital * (1 + tea);
+  const capitalRealFin = capital * (1 + trealAnual);
+  const isNeg = trealAnual < 0;
+
+  document.getElementById('nr-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card highlight">
+        <div class="result-label">TEA nominal</div>
+        <div class="result-value green">${fmtPct(tea*100, 2)}</div>
+        <div class="result-sub">TNA ${fmtPct(tna*100,1)} capitalizada 12 veces</div>
+      </div>
+      <div class="result-card ${isNeg ? 'danger' : 'highlight'}">
+        <div class="result-label">Tasa real anual (Fisher)</div>
+        <div class="result-value ${isNeg ? 'red' : 'green'}">${fmtPct(trealAnual*100, 2)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Capital nominal en 1 año</div>
+        <div class="result-value">${fmtARS(capitalNomFin)}</div>
+      </div>
+      <div class="result-card ${isNeg ? 'danger' : ''}">
+        <div class="result-label">Capital real en 1 año</div>
+        <div class="result-value ${isNeg ? 'red' : ''}">${fmtARS(capitalRealFin)}</div>
+        <div class="result-sub">${isNeg ? '⚠️ Pierde poder adquisitivo' : '✅ Gana poder adquisitivo'}</div>
+      </div>
+    </div>
+    ${isNeg ? `<div class="warn-box"><strong>⚠️ Tasa real negativa de ${fmtPct(trealAnual*100,2)}:</strong> La inflación devora el rendimiento nominal. Necesitás una TNA de al menos ${fmtPct(((1+infEfec) - 1)*100*12/12, 1)}% para empatar la inflación.</div>` : `<div class="info-box"><strong>✅ Tasa real positiva:</strong> Tu inversión supera la inflación.</div>`}
+  `;
+
+  document.getElementById('nr-tasas').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">TNA ingresada</span>
+        <span style="font-family:var(--mono);color:var(--text)">${fmtPct(tna*100, 2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">Tasa mensual</span>
+        <span style="font-family:var(--mono);color:var(--text)">${fmtPct(tnaAMensual(tna)*100, 4)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">TEA (capitalizada)</span>
+        <span style="font-family:var(--mono);color:var(--accent)">${fmtPct(tea*100, 2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">Inflación mensual equiv.</span>
+        <span style="font-family:var(--mono);color:var(--warn)">${fmtPct(tnaAMensual(inf)*100, 2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0">
+        <span style="color:var(--text3)">Tasa real mensual</span>
+        <span style="font-family:var(--mono);color:${trealMensual<0?'var(--accent3)':'var(--accent)'}">${fmtPct(trealMensual*100, 4)}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('nr-chart-wrap').innerHTML = '<canvas id="nr-chart"></canvas>';
+  renderChart('nr-chart', {
+    type: 'bar',
+    data: {
+      labels: ['TNA', 'TEA', 'Inflación efectiva', 'Tasa real'],
+      datasets: [{
+        label: '%',
+        data: [tna*100, tea*100, infEfec*100, trealAnual*100].map(v => Math.round(v*100)/100),
+        backgroundColor: ['#0097ff', '#00e5a0', '#ff6b35', trealAnual < 0 ? '#f87171' : '#4ade80'],
+        borderRadius: 6,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => v + '%' } }, x: { grid: { display: false } } } }
+  });
+}
+
+// --- 7. RENTABILIDAD ALQUILER ---
+function calcRA() {
+  const valor = parseFloat(document.getElementById('ra-valor').value) || 0;
+  const alqMensual = parseFloat(document.getElementById('ra-alquiler').value) || 0;
+  const gastos = parseFloat(document.getElementById('ra-gastos').value) || 0;
+  const vacancia = parseFloat(document.getElementById('ra-vacancia').value) || 0;
+  const tc = parseFloat(document.getElementById('ra-tc').value) || 1000;
+
+  const mesesEfec = 12 - vacancia;
+  const ingresoAnualUSD = alqMensual * mesesEfec;
+  const ingresoAnualARS = ingresoAnualUSD * tc;
+  const gastosARS = gastos * tc;
+  const ingNeto = ingresoAnualARS - gastosARS;
+  const valorARS = valor * tc;
+  const rentBruta = (ingresoAnualUSD / valor) * 100;
+  const rentNeta = ((ingresoAnualUSD - gastos) / valor) * 100;
+  const rentBrutaARS = (ingresoAnualARS / valorARS) * 100;
+
+  document.getElementById('ra-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card highlight">
+        <div class="result-label">Rentabilidad bruta anual</div>
+        <div class="result-value green">${fmtPct(rentBruta, 2)}</div>
+        <div class="result-sub">En dólares</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Rentabilidad neta anual</div>
+        <div class="result-value">${fmtPct(rentNeta, 2)}</div>
+        <div class="result-sub">Descontando gastos y vacancia</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Ingreso anual USD</div>
+        <div class="result-value">${fmtARS(ingresoAnualUSD)} USD</div>
+        <div class="result-sub">${mesesEfec} meses efectivos</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Ingreso neto ARS</div>
+        <div class="result-value">${fmtARS(ingNeto)}</div>
+      </div>
+    </div>
+    <div class="${rentNeta < 4 ? 'warn-box' : 'info-box'}">
+      <strong>${rentNeta < 4 ? '⚠️ Baja rentabilidad:' : '📊 Análisis:'}</strong> Tu yield neto de ${fmtPct(rentNeta,2)} en USD ${rentNeta < 4 ? 'está por debajo del 4% considerado mínimo para inmuebles de renta.' : 'es razonable para inmuebles en Argentina.'}
+      ${valor/alqMensual < 180 ? ' El ratio precio/alquiler mensual es ' + fmt(valor/alqMensual,0) + ' meses.' : ''}
+    </div>
+  `;
+
+  document.getElementById('ra-chart-wrap').innerHTML = '<canvas id="ra-chart"></canvas>';
+  renderChart('ra-chart', {
+    type: 'doughnut',
+    data: {
+      labels: ['Ingreso neto', 'Gastos anuales', 'Vacancia'],
+      datasets: [{
+        data: [Math.round(ingresoAnualUSD - gastos), Math.round(gastos), Math.round(alqMensual * vacancia)],
+        backgroundColor: ['#00e5a0', '#ff6b35', '#ffb800'],
+        borderColor: '#0a0c0f', borderWidth: 3,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+}
+
+// --- 8. DEVALUACIÓN ---
+function calcDev() {
+  const ars = parseFloat(document.getElementById('dev-ars').value) || 0;
+  const usd = parseFloat(document.getElementById('dev-usd').value) || 0;
+  const tcActual = parseFloat(document.getElementById('dev-tc-actual').value) || 1000;
+  const devA = parseFloat(document.getElementById('dev-dev-a').value) / 100;
+  const devB = parseFloat(document.getElementById('dev-dev-b').value) / 100;
+  const devC = parseFloat(document.getElementById('dev-dev-c').value) / 100;
+  const tna = parseFloat(document.getElementById('dev-tna').value) / 100;
+  const meses = parseInt(document.getElementById('dev-meses').value) || 6;
+
+  const tm = tnaAMensual(tna);
+  const arsConInteres = ars * Math.pow(1 + tm, meses);
+
+  function calcEscenario(dev) {
+    const tcNuevo = tcActual * (1 + dev);
+    const arsEnUSD = arsConInteres / tcNuevo;
+    const usdTotal = usd + arsEnUSD;
+    const arsTotal = arsConInteres + usd * tcNuevo;
+    const perdidaUSD = usd - arsEnUSD; // Si tenías ARS y comparás en USD
+    return { tcNuevo, arsEnUSD, usdTotal, arsTotal, dev };
+  }
+
+  const ea = calcEscenario(devA);
+  const eb = calcEscenario(devB);
+  const ec = calcEscenario(devC);
+  const base = { tcNuevo: tcActual, arsEnUSD: arsConInteres / tcActual, usdTotal: usd + arsConInteres / tcActual, arsTotal: arsConInteres + usd * tcActual, dev: 0 };
+
+  document.getElementById('dev-results').innerHTML = `
+    <div class="info-box" style="margin-bottom:16px">
+      ARS con intereses en ${meses} meses: <strong>${fmtARS(arsConInteres)}</strong> (TNA ${fmtPct(tna*100,1)})
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${[
+        {label:'Sin devaluación', e:base, color:'green'},
+        {label:`Dev. ${fmtPct(devA*100,0)}`, e:ea, color:'yellow'},
+        {label:`Dev. ${fmtPct(devB*100,0)}`, e:eb, color:'red'},
+        {label:`Dev. ${fmtPct(devC*100,0)}`, e:ec, color:'red'},
+      ].map(({label, e, color}) => `
+        <div class="result-card">
+          <div class="result-label">${label}</div>
+          <div class="result-value ${color}">TC: $${fmt(e.tcNuevo)}</div>
+          <div class="result-sub">ARS→USD: ${fmt(e.arsEnUSD,0)} USD</div>
+          <div class="result-sub">Total: ${fmt(e.usdTotal,0)} USD</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('dev-chart-wrap').innerHTML = '<canvas id="dev-chart"></canvas>';
+  renderChart('dev-chart', {
+    type: 'bar',
+    data: {
+      labels: ['Sin dev.', `${fmtPct(devA*100,0)}`, `${fmtPct(devB*100,0)}`, `${fmtPct(devC*100,0)}`],
+      datasets: [
+        { label: 'Total USD', data: [base.usdTotal, ea.usdTotal, eb.usdTotal, ec.usdTotal].map(v => Math.round(v)), backgroundColor: ['#00e5a0', '#ffb800', '#ff6b35', '#f87171'], borderRadius: 6 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${fmt(ctx.parsed.y, 0)} USD` } } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => fmt(v) + ' USD' } }, x: { grid: { display: false } } } }
+  });
+}
+
+// --- 9. HIPOTECARIO ---
+function calcHip() {
+  const monto = parseFloat(document.getElementById('hip-monto').value) || 0;
+  const tna = parseFloat(document.getElementById('hip-tna').value) / 100;
+  const plazo = parseInt(document.getElementById('hip-plazo').value) || 120;
+  const inf = parseFloat(document.getElementById('hip-inf').value) / 100;
+
+  const tm = tnaAMensual(tna);
+  const im = tnaAMensual(inf);
+  const cuota = cuotaFrances(monto, tm, plazo);
+  const totalPagado = cuota * plazo;
+  const totalIntereses = totalPagado - monto;
+  const tabla = tablaAmortizacion(monto, tm, plazo);
+
+  const primCuotaReal = cuota / (1 + im);
+  const ultCuotaReal = cuota / Math.pow(1 + im, plazo);
+
+  document.getElementById('hip-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card highlight">
+        <div class="result-label">Cuota mensual</div>
+        <div class="result-value green">${fmtARS(cuota)}</div>
+        <div class="result-sub">Sistema francés</div>
+      </div>
+      <div class="result-card warn">
+        <div class="result-label">Total a pagar</div>
+        <div class="result-value yellow">${fmtARS(totalPagado)}</div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label">Total intereses</div>
+        <div class="result-value red">${fmtARS(totalIntereses)}</div>
+        <div class="result-sub">${fmtPct((totalIntereses/monto)*100, 0)} del capital</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Cuota #1 en términos reales</div>
+        <div class="result-value">${fmtARS(primCuotaReal)}</div>
+        <div class="result-sub">Cuota final real: ${fmtARS(ultCuotaReal)}</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ Licuación real:</strong> Con inflación del ${fmtPct(inf*100,1)} anual, la cuota en términos reales se reduce significativamente con el tiempo. La última cuota vale ${fmtPct((ultCuotaReal/cuota)*100,1)} de lo que vale la primera en poder adquisitivo.
+    </div>
+  `;
+
+  const step = Math.max(1, Math.floor(plazo / 24));
+  const vis = tabla.filter((_, i) => i % step === 0 || i === tabla.length - 1);
+  document.getElementById('hip-chart-wrap').innerHTML = '<canvas id="hip-chart"></canvas>';
+  renderChart('hip-chart', {
+    type: 'line',
+    data: {
+      labels: vis.map(r => 'M' + r.mes),
+      datasets: [
+        { label: 'Saldo deuda', data: vis.map(r => Math.round(r.saldo)), borderColor: '#ff6b35', backgroundColor: 'rgba(255,107,53,0.08)', tension: 0.4, fill: true, pointRadius: 1 },
+        { label: 'Interés mensual', data: vis.map(r => Math.round(r.interes)), borderColor: '#ffb800', tension: 0.4, pointRadius: 1, yAxisID: 'y2' },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } },
+        y2: { position: 'right', grid: { display: false }, ticks: { callback: v => '$ ' + fmt(v) } },
+        x: { grid: { color: '#1f2530' } }
+      }
+    }
+  });
+
+  const tblRows = tabla.filter((_, i) => i % Math.max(1, Math.floor(plazo/36)) === 0 || i === tabla.length - 1).map(r =>
+    `<tr><td>${r.mes}</td><td>${fmtARS(r.cuota)}</td><td>${fmtARS(r.amort)}</td><td>${fmtARS(r.interes)}</td><td>${fmtARS(r.saldo)}</td></tr>`
+  ).join('');
+  document.getElementById('hip-table-wrap').innerHTML = `
+    <div class="table-wrap">
+      <button class="table-toggle" onclick="toggleTable(this)">Tabla de amortización <span class="arrow">▼</span></button>
+      <div class="table-body">
+        <table><thead><tr><th>Mes</th><th>Cuota</th><th>Amort.</th><th>Interés</th><th>Saldo</th></tr></thead>
+        <tbody>${tblRows}</tbody></table>
+      </div>
+    </div>`;
+}
+
+// --- 10. PODER ADQUISITIVO ---
+function calcPA() {
+  const monto = parseFloat(document.getElementById('pa-monto').value) || 0;
+  const inf = parseFloat(document.getElementById('pa-inf').value) / 100;
+  const años = parseInt(document.getElementById('pa-años').value) || 5;
+  const dir = document.getElementById('pa-dir').value;
+
+  const rows = [];
+  for (let a = 1; a <= años; a++) {
+    const factor = Math.pow(1 + inf, a);
+    const montoFuturo = dir === 'futuro' ? monto / factor : monto * factor;
+    rows.push({ año: a, monto: montoFuturo, factor });
+  }
+  const final = rows[rows.length - 1];
+  const perdida = monto - final.monto;
+  const pctPerdida = (perdida / monto) * 100;
+
+  document.getElementById('pa-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card highlight">
+        <div class="result-label">Monto original</div>
+        <div class="result-value green">${fmtARS(monto)}</div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label">${dir === 'futuro' ? `Poder real en ${años} años` : `Equivalente hace ${años} años`}</div>
+        <div class="result-value red">${fmtARS(final.monto)}</div>
+        <div class="result-sub">${dir === 'futuro' ? `Pierde ${fmtPct(pctPerdida,1)} de valor` : `Equivalía a ${fmtARS(final.monto)} hoy`}</div>
+      </div>
+      <div class="result-card warn">
+        <div class="result-label">Factor de inflación</div>
+        <div class="result-value yellow">${fmt(final.factor, 2)}x</div>
+        <div class="result-sub">Los precios se multiplican por ${fmt(final.factor,2)}</div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label">${dir === 'futuro' ? 'Erosión total' : 'Ganancia nominal'}</div>
+        <div class="result-value red">${fmtARS(Math.abs(perdida))}</div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <strong>📉 Impacto acumulado:</strong> Con inflación del ${fmtPct(inf*100,1)} anual durante ${años} años, un peso de hoy valdrá ${fmtPct((1/final.factor)*100,1)} de lo que vale actualmente.
+    </div>
+  `;
+
+  document.getElementById('pa-chart-wrap').innerHTML = '<canvas id="pa-chart"></canvas>';
+  renderChart('pa-chart', {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => `Año ${r.año}`),
+      datasets: [{
+        label: dir === 'futuro' ? 'Poder adquisitivo real' : 'Equivalente histórico',
+        data: rows.map(r => Math.round(r.monto)),
+        backgroundColor: rows.map((_, i) => `rgba(255,107,53,${0.3 + (i / rows.length) * 0.5})`),
+        borderRadius: 4,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { display: false } } } }
+  });
+}
+
+// --- 11. COMPARADOR INVERSIONES ---
+function calcCI() {
+  const capital = parseFloat(document.getElementById('ci-capital').value) || 0;
+  const meses = parseInt(document.getElementById('ci-meses').value) || 12;
+  const inf = parseFloat(document.getElementById('ci-inf').value) / 100;
+  const nomA = document.getElementById('ci-nom-a').value || 'A';
+  const tnaA = parseFloat(document.getElementById('ci-tna-a').value) / 100;
+  const nomB = document.getElementById('ci-nom-b').value || 'B';
+  const tnaB = parseFloat(document.getElementById('ci-tna-b').value) / 100;
+
+  const tmA = tnaAMensual(tnaA), tmB = tnaAMensual(tnaB), im = tnaAMensual(inf);
+  const rows = [];
+  let sA = capital, sB = capital;
+  for (let m = 1; m <= meses; m++) {
+    sA *= (1 + tmA); sB *= (1 + tmB);
+    const srA = sA / Math.pow(1 + im, m);
+    const srB = sB / Math.pow(1 + im, m);
+    rows.push({ mes: m, sA, sB, srA, srB });
+  }
+  const fin = rows[rows.length - 1];
+  const ganA = fin.sA - capital, ganB = fin.sB - capital;
+  const trealA = tasaReal(tnaATea(tnaA), tnaATea(inf));
+  const trealB = tasaReal(tnaATea(tnaB), tnaATea(inf));
+  const mejor = fin.sA > fin.sB ? nomA : nomB;
+
+  document.getElementById('ci-results').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:var(--mono)">${nomA.toUpperCase()}</div>
+        <div class="result-card highlight">
+          <div class="result-label">Final nominal</div>
+          <div class="result-value green">${fmtARS(fin.sA)}</div>
+          <div class="result-sub">+${fmtARS(ganA)}</div>
+        </div>
+        <div class="result-card" style="margin-top:8px">
+          <div class="result-label">Tasa real anual</div>
+          <div class="result-value ${trealA<0?'red':'green'}">${fmtPct(trealA*100,2)}</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:var(--mono)">${nomB.toUpperCase()}</div>
+        <div class="result-card highlight">
+          <div class="result-label">Final nominal</div>
+          <div class="result-value green">${fmtARS(fin.sB)}</div>
+          <div class="result-sub">+${fmtARS(ganB)}</div>
+        </div>
+        <div class="result-card" style="margin-top:8px">
+          <div class="result-label">Tasa real anual</div>
+          <div class="result-value ${trealB<0?'red':'green'}">${fmtPct(trealB*100,2)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>✅ Gana: ${mejor}</strong> con ${fmtARS(Math.abs(fin.sA - fin.sB))} más de capital final.
+      Diferencia de TNA: ${fmtPct(Math.abs(tnaA-tnaB)*100,1)} puntos.
+    </div>
+  `;
+
+  const step = Math.max(1, Math.floor(meses / 24));
+  const vis = rows.filter((_, i) => i % step === 0 || i === rows.length - 1);
+  document.getElementById('ci-chart-wrap').innerHTML = '<canvas id="ci-chart"></canvas>';
+  renderChart('ci-chart', {
+    type: 'line',
+    data: {
+      labels: vis.map(r => 'M' + r.mes),
+      datasets: [
+        { label: nomA + ' (nominal)', data: vis.map(r => Math.round(r.sA)), borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.06)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: nomB + ' (nominal)', data: vis.map(r => Math.round(r.sB)), borderColor: '#0097ff', backgroundColor: 'rgba(0,151,255,0.06)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: nomA + ' (real)', data: vis.map(r => Math.round(r.srA)), borderColor: '#4ade80', tension: 0.4, pointRadius: 1, borderDash: [4,4] },
+        { label: nomB + ' (real)', data: vis.map(r => Math.round(r.srB)), borderColor: '#0097ff', tension: 0.4, pointRadius: 1, borderDash: [4,4] },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { y: { grid: { color: '#1f2530' }, ticks: { callback: v => '$ ' + fmt(v) } }, x: { grid: { color: '#1f2530' } } } }
+  });
+}
+
+// --- 12. COSTO PRÉSTAMO ---
+function calcCP() {
+  const monto = parseFloat(document.getElementById('cp-monto').value) || 0;
+  const tna = parseFloat(document.getElementById('cp-tna').value) / 100;
+  const nCuotas = parseInt(document.getElementById('cp-cuotas').value) || 24;
+  const seguro = parseFloat(document.getElementById('cp-seguro').value) || 0;
+  const gastos = parseFloat(document.getElementById('cp-gastos').value) || 0;
+  const inf = parseFloat(document.getElementById('cp-inf').value) / 100;
+
+  const tm = tnaAMensual(tna);
+  const im = tnaAMensual(inf);
+  const cuotaPura = cuotaFrances(monto, tm, nCuotas);
+  const cuotaTotal = cuotaPura + seguro;
+  const totalPagado = cuotaTotal * nCuotas + gastos;
+  const totalIntereses = cuotaPura * nCuotas - monto;
+  const totalSeguros = seguro * nCuotas;
+
+  // CFT aproximado: TIR del flujo total
+  let low = 0, high = 1, cftMens = 0;
+  for (let i = 0; i < 100; i++) {
+    const mid = (low + high) / 2;
+    let vp = 0;
+    for (let k = 1; k <= nCuotas; k++) vp += cuotaTotal / Math.pow(1 + mid, k);
+    if (vp > monto - gastos) low = mid; else high = mid;
+    cftMens = mid;
+  }
+  const cftAnual = cftMens * 12 * 100;
+  const im12 = tnaAMensual(inf);
+  const tabla = tablaAmortizacion(monto, tm, nCuotas);
+
+  document.getElementById('cp-results').innerHTML = `
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">Cuota pura (capital+int)</div>
+        <div class="result-value">${fmtARS(cuotaPura)}</div>
+      </div>
+      <div class="result-card warn">
+        <div class="result-label">Cuota total (con seguro)</div>
+        <div class="result-value yellow">${fmtARS(cuotaTotal)}</div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label">Total pagado</div>
+        <div class="result-value red">${fmtARS(totalPagado)}</div>
+        <div class="result-sub">${fmtPct((totalPagado/monto-1)*100,0)} del capital original</div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label">CFT aproximado (anual)</div>
+        <div class="result-value red">${fmtPct(cftAnual, 1)}</div>
+        <div class="result-sub">vs TNA declarada: ${fmtPct(tna*100,1)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Total intereses</div>
+        <div class="result-value">${fmtARS(totalIntereses)}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Total seguros</div>
+        <div class="result-value">${fmtARS(totalSeguros)}</div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <strong>⚠️ Costo real vs TNA:</strong> El CFT (${fmtPct(cftAnual,1)}) es ${fmtPct(cftAnual - tna*100,1)} puntos mayor que la TNA declarada. Siempre compará el CFT, no sólo la TNA.
+    </div>
+  `;
+
+  document.getElementById('cp-chart-wrap').innerHTML = '<canvas id="cp-chart"></canvas>';
+  renderChart('cp-chart', {
+    type: 'doughnut',
+    data: {
+      labels: ['Capital devuelto', 'Intereses', 'Seguros', 'Gastos'],
+      datasets: [{
+        data: [monto, Math.round(totalIntereses), Math.round(totalSeguros), gastos],
+        backgroundColor: ['#00e5a0', '#ff6b35', '#ffb800', '#0097ff'],
+        borderColor: '#0a0c0f', borderWidth: 3,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+
+  const tblRows = tabla.map(r =>
+    `<tr><td>${r.mes}</td><td>${fmtARS(r.cuota)}</td><td>${fmtARS(r.cuota + seguro)}</td><td>${fmtARS(r.interes)}</td><td>${fmtARS(r.amort)}</td><td>${fmtARS(r.saldo)}</td></tr>`
+  ).join('');
+  document.getElementById('cp-table-wrap').innerHTML = `
+    <div class="table-wrap">
+      <button class="table-toggle" onclick="toggleTable(this)">Tabla de cuotas <span class="arrow">▼</span></button>
+      <div class="table-body">
+        <table><thead><tr><th>Cuota</th><th>Capital+Int</th><th>+Seguro</th><th>Interés</th><th>Amort.</th><th>Saldo</th></tr></thead>
+        <tbody>${tblRows}</tbody></table>
+      </div>
+    </div>`;
+}
+
+</script>
+</body>
+</html>
